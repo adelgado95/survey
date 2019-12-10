@@ -1,0 +1,51 @@
+{% extends 'surveys/base.html' %}
+{% block content %}
+<h1>{{ task_id }}</h1>
+{% endblock content %}
+{% block extra_js %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        console.log("We ahre in ready function");
+        var result = '';
+        $('body').append('<div style="" id="loadingDiv"><div class="loader">Loading...</div></div>');
+        var interval = window.setInterval(function(){
+            $.ajax({
+                url: "/celery/{{ task_id }}"
+            }).done(function(data) {
+                console.log(data['result']);
+                if (String(data['result']).localeCompare('SUCCESS') == 0)
+                {
+                    console.log('Lo hciimos');
+                    removeLoader();
+                    insert_table_with_data(data);
+                    window.clearInterval(interval);
+                }
+            });
+        }, 1000);
+
+    });
+    function removeLoader(){
+        $( "#loadingDiv" ).fadeOut(500, function() {
+      // fadeOut complete. Remove the loading div
+        $( "#loadingDiv" ).remove(); //makes page more lightweight
+        });
+    }
+    function insert_table_with_data(data){
+        console.log(data);
+         $('body').append('<table id="survey_table" class="table"><thead><th>pk</th><th>Slug</th><th>StartDate</th><th>EndDate</th></thead><tbody>');
+        $.each(data['data'], function( index, value ) {
+            strhtml = '<tr><td>'+value['pk']+'</td>';
+            console.log( index + ": " + value['pk'] );
+            strhtml += '<td>'+value['fields']['slug']+'</td><td>'+value['fields']['start_date']+'</td><td>'+value['fields']['end_date']+'</td></tr>';
+
+            $.each(value['fields'], function( i, v ) {
+                console.log( i + ": " + v );
+            });
+            $("#survey_table tbody").append(strhtml);
+
+        });
+        $("#survey_table").append("</table>");
+    }
+
+</script>
+{% endblock extra_js %}
