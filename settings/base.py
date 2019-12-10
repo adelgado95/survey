@@ -21,7 +21,8 @@ BASE_APPS = [
 ]
 
 PROJECT_APPS = [
-    'surveys'
+    'surveys',
+    'django_celery_beat',
 ]
 
 INSTALLED_APPS = BASE_APPS + PROJECT_APPS
@@ -116,8 +117,8 @@ MEDIA_URL = '/media/'
 
 LOGIN_REDIRECT_URL='index'
 LOGOUT_REDIRECT_URL='index'
-
 # REDIS SETTINGS
+
 REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis_db')
 REDIS_DB = 0
