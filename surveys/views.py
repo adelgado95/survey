@@ -3,7 +3,7 @@ import logging
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import TemplateView
@@ -11,7 +11,9 @@ from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from .models import UserChoice, Question, Survey
-from .tasks import increment_vote, increment_counter
+from .tasks import increment_vote, increment_counter,fill_report_test
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +63,8 @@ class UserChoiceCreateView(RandomQuestionMixin, CreateView):
     fields = ['question', 'choice']
 
     def get_success_url(self):
-        return reverse('index')
 
+        return reverse('index')
     def form_invalid(self, form):
         responsedict = {
             'errors': form.errors,
@@ -117,3 +119,26 @@ def questions_view(request, slug):
         'labels': labels
     }
     return HttpResponse(json.dumps(responsedict))
+
+def celery_result_view(request, task_id):
+    from app_survey.celery import app
+    result = app.AsyncResult(task_id)
+    if result.state in ('PENDING', 'FAILURE', 'STARTED'):
+        return JsonResponse({'result': result.state}, safe=False)
+    if result.state == 'SUCCESS':
+        data = {}
+        data['result'] = 'SUCCESS'
+        data['data'] = result.get()
+        return JsonResponse(data,safe=False)
+
+
+def celery_task_test(request):
+    import time
+    task = fill_report_test.delay()
+    time.sleep(30)
+    return HttpResponse(task)
+
+def report_url_test(request):
+    task = fill_report_test.delay()
+    return render(request, 'surveys/report_from_url.html', {'task_id': task.id})
+

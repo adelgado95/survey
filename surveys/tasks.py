@@ -1,5 +1,5 @@
 import logging
-from celery import shared_task
+from celery import shared_task, task
 from django.db.models import F
 from django.conf import settings
 
@@ -21,3 +21,13 @@ def increment_counter(choice_id):
     rconn = get_redis()
     rconn.incr("Choice%s" % choice_id)
     logger.info("done")
+
+@shared_task
+def fill_report_test():
+    import time, json
+    from .models import Survey
+    from django.core.serializers import serialize
+    time.sleep(20)
+    surveys = Survey.objects.all()
+    data = json.loads(serialize('json', surveys))
+    return data
