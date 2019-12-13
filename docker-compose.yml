@@ -31,9 +31,10 @@ services:
           - "survey-rabbitmq:rabbitmq_host"
         volumes:
           - .:/srv/survey
-          - ./compose/supervisor/conf.d:/etc/supervisor/conf.d
+          - ./compose/supervisor/admin/conf.d:/etc/supervisor/conf.d
           - ./volumes/logs:/var/log
-        command: /start.sh
+        #command: /start.sh
+        command: "supervisord -n -c /etc/supervisord.conf"
         ports:
           - "8000:8000"
 
@@ -65,14 +66,18 @@ services:
         restart: unless-stopped
         env_file:
           - ./enviroments/development.env
+        #entrypoint: ./celery_entrypoint.sh
         depends_on:
           - survey-mysql
           - survey-redis
           - survey-rabbitmq
         volumes:
+          - ./compose/supervisor/celery/conf.d:/etc/supervisor/conf.d
           - .:/srv/survey
+          - ./volumes/logs:/var/log
         links:
           - "survey-mysql:mysql_db"
           - "survey-redis:redis_db"
           - "survey-rabbitmq:rabbitmq_host"
-        command: celery worker -A app_survey --queues surveys,stats --loglevel INFO
+#        command: celery worker -A app_survey --queues surveys,stats --loglevel INFO
+        command: "supervisord -n -c /etc/supervisord.conf"
