@@ -16,6 +16,7 @@ services:
           dockerfile: ./compose/django/Dockerfile
         image: survey_django
         container_name: survey-django
+        hostname: survey-django
         restart: unless-stopped
         stdin_open: true
         tty: true
@@ -62,6 +63,7 @@ services:
           context: .
           dockerfile: ./compose/django/Dockerfile
         image: survey_django
+        hostname: survey-celery
         container_name: survey-celery
         restart: unless-stopped
         env_file:
