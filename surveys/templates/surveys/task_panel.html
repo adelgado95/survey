@@ -1,0 +1,42 @@
+{% extends 'surveys/base.html' %}
+{% block content %}
+<ul class="nav">
+    <li class="nav-item">
+      <a class="nav-link active" href="#">Success :</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Pending :</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Failed :</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#">Total :</a>
+      </li>
+
+    </ul>
+
+    <table class="table table-bordered small">
+        <thead>
+          <tr>
+            <th scope="col">Task Name</th>
+            <th scope="col">Status</th>
+            <th scope="col">Args</th>
+            <th scope="col">Kwars</th>
+            <th scope="col">State Time</th>
+
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+          <tr>
+              <th scope="row">{{task.task_id}}</th>
+              <td>{{task.task_name}}</td>
+              <td>{{task.arguments}}</td>
+              <td>{{task.kwarguments}}</td>
+              <td>{{task.state_datetime|date:'Y-m-d h:i:s'}}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+{% endblock content %}

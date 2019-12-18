@@ -6,7 +6,7 @@ from .views import (
     IndexView, UserChoiceCreateView,
     SurveyDetailView, SurveyListView,
     start_again, questions_view, celery_result_view,
-    celery_task_test, report_url_test
+    celery_task_test, report_url_test, task_panel_view
 )
 
 urlpatterns = [
@@ -20,6 +20,7 @@ urlpatterns = [
     path('celery/<str:task_id>', celery_result_view, name='celery_result_view'),
     path('task_test', celery_task_test),
     path('report_url_test', report_url_test),
+    path('task-panel', task_panel_view, name='task-panel')
 
 
 
