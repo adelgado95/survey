@@ -108,3 +108,23 @@ class UserChoice(models.Model):
     # Read Using cookie-based sessions Warning
     # https://docs.djangoproject.com/en/2.2/topics/http/sessions/
     session_key = models.CharField(max_length=32, null=True)
+
+class MetaDataTask(models.Model):
+    task_id = models.CharField(max_length=400)
+    task_name = models.CharField(max_length=50)
+    arguments = models.CharField(max_length=50)
+    kwarguments = models.CharField(max_length=50)
+    state = models.CharField(max_length=20)
+    state_datetime = models.DateTimeField()
+    celery_state = models.CharField(max_length=20)
+
+    # def __init__(task_id,task_name,state,state_datetime,arguments='',kwarguments=''):
+    #     self.task_id = task_id
+    #     self.task_name = task_name
+    #     self.arguments = arguments
+    #     self.kwarguments = kwarguments
+    #     self.state = state
+    #     self.state_datetime = state_datetime
+
+    class Meta:
+        managed = False

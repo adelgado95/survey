@@ -12,7 +12,10 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from .models import UserChoice, Question, Survey
 from .tasks import increment_vote, increment_counter,fill_report_test
-
+from . import celery_native_task_pattern, custom_celery_task_mask
+from .utils import get_redis
+from .models import MetaDataTask
+from datetime import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -142,3 +145,39 @@ def report_url_test(request):
     task = fill_report_test.delay()
     return render(request, 'surveys/report_from_url.html', {'task_id': task.id})
 
+def task_panel_view(request):
+    r_con = get_redis()
+    obj = list()
+    for key in r_con.scan_iter(celery_native_task_pattern):
+        data_task_object = MetaDataTask
+        celery_data_task = json.loads(r_con.get(key))
+        custom_data_task = json.loads(r_con.get(custom_celery_task_mask.format(celery_data_task['task_id'])))
+        #print(custom_data_task)
+        # print(r_con.get(key))
+        data_task_object.task_id = str(celery_data_task['task_id'])
+        # logger.warning(r_con.get(key))
+        data_task_object.celery_state = celery_data_task['status']
+        data_task_object.task_name = custom_data_task['task_name']
+        print(custom_data_task)
+        data_task_object.arguments = custom_data_task['args']
+        data_task_object.kwarguments = custom_data_task['kwargs']
+        data_task_object.state_datetime = datetime.strptime(custom_data_task['state_datetime'], "%Y-%m-%d %H:%M:%S")
+
+        # task_id = models.CharField(max_length=400)
+        # task_name = models.CharField(max_length=50)
+        # arguments = models.CharField(max_length=50)
+        # kwarguments = models.CharField(max_length=50)
+        # state = models.CharField(max_length=20)
+        # state_datetime = models.DateTimeField()
+        # celery_state = models.CharField(max_length=20)
+        #print(obj.append(json.dumps(data_task_object)))
+        #print (data_task_object.__dict__)
+        obj.append(data_task_object.__dict__)
+
+    context = {
+            'tasks' :  obj ,
+            }
+    print("Context")
+
+
+    return render(request, 'surveys/task_panel.html', context)
