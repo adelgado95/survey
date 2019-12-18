@@ -158,26 +158,17 @@ def task_panel_view(request):
         # logger.warning(r_con.get(key))
         data_task_object.celery_state = celery_data_task['status']
         data_task_object.task_name = custom_data_task['task_name']
-        print(custom_data_task)
         data_task_object.arguments = custom_data_task['args']
         data_task_object.kwarguments = custom_data_task['kwargs']
         data_task_object.state_datetime = datetime.strptime(custom_data_task['state_datetime'], "%Y-%m-%d %H:%M:%S")
-
-        # task_id = models.CharField(max_length=400)
-        # task_name = models.CharField(max_length=50)
-        # arguments = models.CharField(max_length=50)
-        # kwarguments = models.CharField(max_length=50)
-        # state = models.CharField(max_length=20)
-        # state_datetime = models.DateTimeField()
-        # celery_state = models.CharField(max_length=20)
-        #print(obj.append(json.dumps(data_task_object)))
-        #print (data_task_object.__dict__)
-        obj.append(data_task_object.__dict__)
+        obj.append((data_task_object.__dict__).copy())
 
     context = {
             'tasks' :  obj ,
             }
     print("Context")
+    for o in obj:
+        print(o['task_id'])
 
 
     return render(request, 'surveys/task_panel.html', context)
