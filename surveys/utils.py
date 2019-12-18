@@ -1,5 +1,6 @@
 import datetime
 import redis
+import json
 from django.conf import settings
 
 
@@ -18,3 +19,14 @@ def get_redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.RE
         port=port,
         db=db,
     )
+
+def get_dict_from_task_data(task_id,task_name,arguments,kwarguments,state,state_datetime):
+    task_dict = {'task_id':task_id, 'task_name':task_name,'state': state, 'state_datetime': state_datetime}
+    str_args = ','.join(map(str, arguments))
+    str_kwargs = json.dumps(kwarguments)
+    task_dict['args'] = str_args
+    task_dict['kwargs'] = str_kwargs
+    print(task_dict)
+    return task_dict
+
+
