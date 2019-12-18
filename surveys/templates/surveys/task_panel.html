@@ -19,6 +19,7 @@
     <table class="table table-bordered small">
         <thead>
           <tr>
+            <th scope="col">Id</th>
             <th scope="col">Task Name</th>
             <th scope="col">Status</th>
             <th scope="col">Args</th>
@@ -32,6 +33,7 @@
           <tr>
               <th scope="row">{{task.task_id}}</th>
               <td>{{task.task_name}}</td>
+              <td>{{task.celery_state}}</td>
               <td>{{task.arguments}}</td>
               <td>{{task.kwarguments}}</td>
               <td>{{task.state_datetime|date:'Y-m-d h:i:s'}}</td>
