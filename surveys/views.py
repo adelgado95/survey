@@ -12,9 +12,7 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from .models import UserChoice, Question, Survey
 from .tasks import increment_vote, increment_counter,fill_report_test
-from . import celery_native_task_pattern, custom_celery_task_mask
-from .utils import get_redis
-from .models import MetaDataTask
+from .utils import get_redis, get_task_data_and_counter_state_dict
 from datetime import datetime
 
 
@@ -147,25 +145,12 @@ def report_url_test(request):
 
 def task_panel_view(request):
     r_con = get_redis()
-    obj = list()
-    for key in r_con.scan_iter(celery_native_task_pattern):
-        data_task_object = MetaDataTask
-        celery_data_task = json.loads(r_con.get(key))
-        custom_data_task = json.loads(r_con.get(custom_celery_task_mask.format(celery_data_task['task_id'])))
-        #print(custom_data_task)
-        # print(r_con.get(key))
-        data_task_object.task_id = str(celery_data_task['task_id'])
-        # logger.warning(r_con.get(key))
-        data_task_object.celery_state = celery_data_task['status']
-        data_task_object.task_name = custom_data_task['task_name']
-        data_task_object.arguments = custom_data_task['args']
-        data_task_object.kwarguments = custom_data_task['kwargs']
-        data_task_object.state_datetime = datetime.strptime(custom_data_task['state_datetime'], "%Y-%m-%d %H:%M:%S")
-        obj.append((data_task_object.__dict__).copy())
-
+    obj, counter = get_task_data_and_counter_state_dict()
     context = {
             'tasks' :  obj ,
+            'states': counter
             }
+
     print("Context")
     for o in obj:
         print(o['task_id'])

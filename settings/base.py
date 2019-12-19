@@ -138,3 +138,6 @@ CELERY_TASK_RESULT_EXPIRES = 60 * 60 * 24 * 7
 
 CELERY_REDIS_HOST = REDIS_HOST
 CELERY_REDIS_PORT = 6379
+#Testing new lower case settings
+task_track_started = True
+task_store_errors_even_if_ignored = True

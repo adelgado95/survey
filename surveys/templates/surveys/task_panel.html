@@ -2,17 +2,21 @@
 {% block content %}
 <ul class="nav">
     <li class="nav-item">
-      <a class="nav-link active" href="#">Success :</a>
+      <a class="nav-link active" href="#">Success: {{states.SUCCESS}}
+      </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="#">Pending :</a>
+      <a class="nav-link" href="#">Pending: {{states.PENDING}}</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="#">Failed :</a>
+      <a class="nav-link" href="#">Failure: {{states.FAILURE}}</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="#">Total :</a>
-      </li>
+      <a class="nav-link" href="#">Retry: {{states.RETRY}}</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#">Total: {{states.TOTAL}}</a>
+    </li>
 
     </ul>
 
