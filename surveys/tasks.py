@@ -4,7 +4,7 @@ from celery import shared_task, Task, task
 from django.db.models import F
 from django.conf import settings
 from . import custom_celery_task_mask
-from .utils import get_redis, get_dict_from_task_data
+from .utils import get_redis, get_dict_from_task_data, fullname
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -12,9 +12,14 @@ logger = logging.getLogger(__name__)
 class FallbackTask(Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         print('{0!r} failed: {1!r}'.format(task_id, exc))
-        print(self.__dict__['__trace__'].__dict__)
+        print("self name")
+        print(self)
+        print("exc")
+        print(exc)
+        print("einfo")
+        print(einfo)
         task_key = custom_celery_task_mask.format(task_id)
-        task_dict = get_dict_from_task_data(task_id, self.__dict__['__qualname__'], args,
+        task_dict = get_dict_from_task_data(task_id, fullname(self), args,
                                 kwargs, 'FAILED', datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         r_con = get_redis()
         r_con.set(task_key, json.dumps(task_dict))
@@ -44,8 +49,10 @@ class FallbackTask(Task):
         print('{0!r} success:'.format(task_id))
         print(self.__dict__)
         print(self.__dict__['__trace__'].__dict__)
+        print("Priting retval")
+        print(retval)
         task_key = custom_celery_task_mask.format(task_id)
-        task_dict = get_dict_from_task_data(task_id, self.__dict__['__qualname__'], args,
+        task_dict = get_dict_from_task_data(task_id, fullname(self), args,
                                 kwargs, 'SUCCESS', datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         r_con = get_redis()
         r_con.set(task_key, json.dumps(task_dict))

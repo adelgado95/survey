@@ -3,7 +3,7 @@ import redis
 import json
 from django.conf import settings
 from . import celery_native_task_pattern, custom_celery_task_mask
-
+from importlib import import_module
 
 SURVEY_DAYS = 15
 survey_end_date = lambda: datetime.date.today() + datetime.timedelta(days=SURVEY_DAYS)
@@ -59,6 +59,18 @@ def get_task_data_and_counter_state_dict():
             data_task_object.task_name = ''
             data_task_object.arguments = ''
             data_task_object.kwarguments = ''
-            data_task_object.state_datetime = datetime.strptime(celery_data_task['date_done'], "%Y-%m-%d %H:%M:%S")
+            data_task_object.state_datetime = datetime.strptime(str(celery_data_task['date_done']).replace('T',' '), "%Y-%m-%d %H:%M:%S.%f")
     return obj, status_counter
 
+def fullname(o):
+  module = o.__class__.__module__
+  if module is None or module == str.__class__.__module__:
+    return o.__class__.__name__
+  else:
+    return module + '.' + o.__class__.__name__
+
+def dynamic_import(class_name):
+    mods, klass = class_name.rsplit('.',1)
+    module_object = import_module(mods)
+    target_class = getattr(module_object, klass)
+    return target_class

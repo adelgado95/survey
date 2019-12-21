@@ -29,6 +29,7 @@
             <th scope="col">Args</th>
             <th scope="col">Kwars</th>
             <th scope="col">State Time</th>
+            <th scope="col">Action</th>
 
           </tr>
         </thead>
@@ -41,6 +42,10 @@
               <td>{{task.arguments}}</td>
               <td>{{task.kwarguments}}</td>
               <td>{{task.state_datetime|date:'Y-m-d h:i:s'}}</td>
+              <td>
+                {% if task.celery_state == 'FAILURE' %}
+                    <a class="nav-link" href="/celery_resend/{{task.task_name}}/{{task.arguments}}/{{task.kwarguments}}">Resend</a>                {% endif%}
+              </td>
             </tr>
           {% endfor %}
         </tbody>

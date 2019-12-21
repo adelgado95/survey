@@ -1,5 +1,6 @@
 import json
 import logging
+import ast
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -11,9 +12,10 @@ from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from .models import UserChoice, Question, Survey
-from .tasks import increment_vote, increment_counter,fill_report_test
-from .utils import get_redis, get_task_data_and_counter_state_dict
+from .tasks import increment_vote, increment_counter,fill_report_test, fill_report_test_with_params
+from .utils import get_redis, get_task_data_and_counter_state_dict, dynamic_import
 from datetime import datetime
+
 
 
 logger = logging.getLogger(__name__)
@@ -124,13 +126,36 @@ def questions_view(request, slug):
 def celery_result_view(request, task_id):
     from app_survey.celery import app
     result = app.AsyncResult(task_id)
-    if result.state in ('PENDING', 'FAILURE', 'STARTED'):
-        return JsonResponse({'result': result.state}, safe=False)
+    print(result.__dict__)
     if result.state == 'SUCCESS':
         data = {}
         data['result'] = 'SUCCESS'
         data['data'] = result.get()
         return JsonResponse(data,safe=False)
+    else:
+        return JsonResponse({'result': result.state}, safe=False)
+
+def celery_resend_view(request, task_name, args, kwargs):
+    # from app_survey.celery import app
+    # result = app.AsyncResult(task_id)
+    # if result.state in ('PENDING', 'FAILURE', 'STARTED'):
+    #     return JsonResponse({'result': result.state}, safe=False)
+    # if result.state == 'SUCCESS':
+    #     data = {}
+    #     data['result'] = 'SUCCESS'
+    #     data['data'] = result.get()
+    #     return JsonResponse(data,safe=False)
+    data = {'task_name': task_name, 'args': args, 'kwargs': kwargs}
+    klass = dynamic_import(task_name)
+    print(klass)
+    args = ast.literal_eval(args)
+    print (args)
+    kwargs = json.loads(kwargs)
+    print (kwargs)
+    task = klass.delay(args,kwargs)
+    data.update({'task_id': task.id})
+    return redirect('/celery-monitor/{0}'.format(task.id),safe=False)
+
 
 
 def celery_task_test(request):
@@ -150,10 +175,10 @@ def task_panel_view(request):
             'tasks' :  obj ,
             'states': counter
             }
-
     print("Context")
     for o in obj:
         print(o['task_id'])
-
-
     return render(request, 'surveys/task_panel.html', context)
+
+def celery_monitor_view(request, task_id):
+    return render(request, 'surveys/realtime_task.html', {'task_id': task_id})
