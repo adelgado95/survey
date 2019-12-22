@@ -130,7 +130,14 @@ def celery_result_view(request, task_id):
     if result.state == 'SUCCESS':
         data = {}
         data['result'] = 'SUCCESS'
+        data['date_done'] = result.date_done
         data['data'] = result.get()
+        return JsonResponse(data,safe=False)
+    elif result.state == 'FAILURE':
+        data = {}
+        data['result'] = 'FAILURE'
+        data['date_done'] = result.date_done
+        data['data'] = result.traceback
         return JsonResponse(data,safe=False)
     else:
         return JsonResponse({'result': result.state}, safe=False)
@@ -152,7 +159,7 @@ def celery_resend_view(request, task_name, args, kwargs):
     print (args)
     kwargs = json.loads(kwargs)
     print (kwargs)
-    task = klass.delay(args,kwargs)
+    task = klass.delay(*args,**kwargs)
     data.update({'task_id': task.id})
     return redirect('/celery-monitor/{0}'.format(task.id),safe=False)
 

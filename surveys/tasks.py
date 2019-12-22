@@ -92,11 +92,11 @@ def increment_counter(choice_id):
     logger.info("done")
 
 @task(base=FallbackTask)
-def fill_report_test():
+def fill_report_test(*args,**kwargs):
     import time, json
     from .models import Survey
     from django.core.serializers import serialize
-    time.sleep(20)
+    time.sleep(1)
     surveys = Survey.objects.all()
     data = json.loads(serialize('json', surveys))
     return data

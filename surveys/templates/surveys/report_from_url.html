@@ -13,6 +13,7 @@
                 url: "/celery/{{ task_id }}"
             }).done(function(data) {
                 console.log(data['result']);
+                console.log(data);
                 if (String(data['result']).localeCompare('SUCCESS') == 0)
                 {
                     console.log('Lo hciimos');

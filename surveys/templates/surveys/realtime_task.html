@@ -11,12 +11,12 @@
             <td id="status"></td>
         </tr>
         <tr>
-          <th>date_done</th>
-            <td></td>
+          <th>Date_done</th>
+            <td id="date_done"></td>
         </tr>
         <tr>
-          <th>Info</th>
-            <td></td>
+          <th>Data</th>
+            <td id="data"></td>
         </tr>
     </tbody>
       </table>
@@ -32,7 +32,7 @@
                 url: "/celery/{{ task_id }}"
             }).done(function(data) {
                 console.log(data['result']);
-                if (String(data['result']).localeCompare('SUCCESS') == 0)
+                if ((String(data['result']).localeCompare('SUCCESS') == 0) || (String(data['result']).localeCompare('FAILURE') == 0))
                 {
                     console.log('Lo hciimos');
                     removeLoader();
@@ -55,6 +55,8 @@
     function insert_state_with_data(data){
         console.log(data);
         $('#status').html(data['result']);
+        $('#date_done').html(data['date_done']);
+        $('#data').html(data['data']);
         console.log("seted value");
         //  $('body').append('<table id="survey_table" class="table"><thead><th>pk</th><th>Slug</th><th>StartDate</th><th>EndDate</th></thead><tbody>');
         // $.each(data['data'], function( index, value ) {
